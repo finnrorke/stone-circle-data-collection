@@ -1,0 +1,79 @@
+[
+  {
+    "id": "historic_england",
+    "name": "Historic England Scheduled Monuments",
+    "type": "download",
+    "format": "geojson",
+    "url": "https://hub.arcgis.com/api/download/v1/items/767f279327a24845bf47dfe5eae9862b/geojson?redirect=true&layers=6",
+    "enabled": true,
+    "filename": "historic_england_scheduled_monuments.geojson",
+    "notes": "Official ArcGIS Hub download for NHLE layer 6 (Scheduled Monuments)."
+  },
+  {
+    "id": "hes_scheduled",
+    "name": "Historic Environment Scotland Scheduled Monuments",
+    "type": "api",
+    "format": "geojson",
+    "url": "https://inspire.hes.scot/arcgis/rest/services/HES/Scheduled_Monuments/MapServer/0/query?where=1%3D1&outFields=*&f=geojson",
+    "enabled": true,
+    "filename": "hes_scheduled_monuments.geojson",
+    "notes": "Official HES ArcGIS query endpoint returning GeoJSON."
+  },
+  {
+    "id": "cadw",
+    "name": "Cadw Scheduled Ancient Monuments",
+    "type": "wfs",
+    "format": "geojson",
+    "url": "https://datamap.gov.wales/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=inspire-wg:Cadw_SAM&outputFormat=application/json",
+    "enabled": true,
+    "filename": "cadw_scheduled_ancient_monuments.geojson",
+    "notes": "Official DataMapWales WFS layer inspire-wg:Cadw_SAM."
+  },
+  {
+    "id": "nismr",
+    "name": "Northern Ireland Sites and Monuments Record",
+    "type": "download",
+    "format": "zip",
+    "url": "https://www.communities-ni.gov.uk/sites/default/files/2026-03/sites-monuments-record.zip",
+    "enabled": true,
+    "filename": "sites-monuments-record.zip",
+    "notes": "Official Department for Communities bulk GIS download."
+  },
+  {
+    "id": "ni_scheduled",
+    "name": "Northern Ireland Scheduled Historic Monument Areas",
+    "type": "download",
+    "format": "zip",
+    "url": "https://www.communities-ni.gov.uk/sites/default/files/2026-03/scheduled-historic-monument-areas.zip",
+    "enabled": true,
+    "filename": "scheduled-historic-monument-areas.zip",
+    "notes": "Official Department for Communities bulk GIS download."
+  },
+  {
+    "id": "heritage_gateway",
+    "name": "Heritage Gateway",
+    "type": "manual",
+    "format": "html",
+    "url": "https://www.heritagegateway.org.uk/",
+    "enabled": false,
+    "notes": "Search-oriented portal; no stable bulk download URL identified."
+  },
+  {
+    "id": "archwilio",
+    "name": "Archwilio",
+    "type": "manual",
+    "format": "html",
+    "url": "https://www.archwilio.org.uk/",
+    "enabled": false,
+    "notes": "Search-oriented records portal; no stable bulk download URL identified."
+  },
+  {
+    "id": "coflein",
+    "name": "Coflein",
+    "type": "manual",
+    "format": "html",
+    "url": "https://coflein.gov.uk/",
+    "enabled": false,
+    "notes": "Search-oriented catalogue; bulk export route is unclear and left manual for Stage 1."
+  }
+]
