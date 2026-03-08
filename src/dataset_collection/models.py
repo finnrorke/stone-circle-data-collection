@@ -53,3 +53,20 @@ class SourceDefinition(BaseModel):
         if self.enabled and not self.url:
             raise ValueError("enabled non-manual sources must define a non-empty url")
         return self
+
+
+class DownloadMetadata(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: str
+    source_name: str
+    url: str
+    request_method: HttpMethod
+    fetched_at: str
+    http_status: int | None
+    content_type: str | None
+    output_file: str
+    file_size: int
+    sha256: str | None
+    success: bool
+    error_message: str | None = None

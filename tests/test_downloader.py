@@ -85,3 +85,44 @@ def test_downloader_handles_failed_request_without_crashing_whole_run(tmp_path: 
     assert results[0].success is True
     assert results[1].success is False
     assert "network down" in (results[1].error_message or "")
+
+
+def test_downloader_retries_deferred_export_until_content_is_ready(tmp_path: Path) -> None:
+    source = SourceDefinition(
+        id="historic_england",
+        name="Historic England",
+        type="download",
+        format="geojson",
+        url="https://example.com/export.geojson",
+        enabled=True,
+        filename="scheduled-monuments.geojson",
+    )
+    responses = iter(
+        [
+            httpx.Response(
+                status_code=202,
+                headers={"content-type": "application/json"},
+                json={"status": "ExportingData", "message": "Please retry"},
+                request=httpx.Request("GET", source.url),
+            ),
+            httpx.Response(
+                status_code=200,
+                headers={"content-type": "application/geo+json"},
+                content=b'{"type":"FeatureCollection","features":[]}',
+                request=httpx.Request("GET", source.url),
+            ),
+        ]
+    )
+    client = httpx.Client(transport=httpx.MockTransport(lambda request: next(responses)))
+
+    results = collect_sources(
+        sources=[source],
+        output_root=tmp_path / "raw",
+        force=False,
+        today="2026-03-08",
+        client=client,
+    )
+
+    assert results[0].success is True
+    assert results[0].http_status == 200
+    assert Path(results[0].output_file).read_text(encoding="utf-8") == '{"type":"FeatureCollection","features":[]}'

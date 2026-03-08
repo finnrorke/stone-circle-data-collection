@@ -12,12 +12,12 @@
   {
     "id": "hes_scheduled",
     "name": "Historic Environment Scotland Scheduled Monuments",
-    "type": "api",
+    "type": "manual",
     "format": "geojson",
     "url": "https://inspire.hes.scot/arcgis/rest/services/HES/Scheduled_Monuments/MapServer/0/query?where=1%3D1&outFields=*&f=geojson",
-    "enabled": true,
+    "enabled": false,
     "filename": "hes_scheduled_monuments.geojson",
-    "notes": "Official HES ArcGIS query endpoint returning GeoJSON."
+    "notes": "Official HES ArcGIS service identified, but a stable single-request bulk fetch was not confirmed for Stage 1."
   },
   {
     "id": "cadw",
