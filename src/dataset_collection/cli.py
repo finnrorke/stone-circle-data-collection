@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 
 from dataset_collection.downloader import collect_sources
+from dataset_collection.normalize import normalise_sources
 from dataset_collection.logging_config import configure_logging
 from dataset_collection.manifest import load_sources
 
@@ -27,6 +28,13 @@ def build_parser() -> argparse.ArgumentParser:
     collect_parser.add_argument("--force", action="store_true")
     collect_parser.set_defaults(handler=handle_collect)
 
+    normalise_parser = subparsers.add_parser("normalise")
+    normalise_parser.add_argument("--sources", type=Path, required=True)
+    normalise_parser.add_argument("--source", dest="source_id")
+    normalise_parser.add_argument("--raw-root", type=Path, default=Path("data/raw"))
+    normalise_parser.add_argument("--output-root", type=Path, default=Path("data/normalized"))
+    normalise_parser.set_defaults(handler=handle_normalise)
+
     return parser
 
 
@@ -43,6 +51,29 @@ def handle_collect(args: argparse.Namespace) -> int:
     successes = len(results) - failures
     logger.info("Collection complete: %s succeeded, %s failed", successes, failures)
     return 1 if failures else 0
+
+
+def handle_normalise(args: argparse.Namespace) -> int:
+    sources = load_sources(args.sources)
+    selected_sources = [
+        source
+        for source in sources
+        if args.source_id is None or source.id == args.source_id
+    ]
+    summaries = normalise_sources(
+        sources=selected_sources,
+        raw_root=args.raw_root,
+        output_root=args.output_root,
+    )
+    failures = sum(summary.records_failed for summary in summaries)
+    source_errors = sum(1 for summary in summaries if summary.skipped_reason == "source_error")
+    logger.info(
+        "Normalization complete: %s sources, %s record failures, %s source errors",
+        len(summaries),
+        failures,
+        source_errors,
+    )
+    return 1 if source_errors else 0
 
 
 def main() -> int:
