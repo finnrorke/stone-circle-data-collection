@@ -4,6 +4,8 @@ Stage 1 collects raw UK megalith-related heritage datasets without changing thei
 
 Stage 2 normalises supported raw files into a single internal record schema. It reads the same manifest, discovers the latest successful raw file per source under `data/raw/`, parses supported source formats, and writes one JSON Lines output file per source under `data/normalized/`.
 
+Stage 3 classifies each normalized record independently into `included`, `excluded`, or `review`. It applies a small rule-based keyword matcher across selected normalized text fields, preserves the original record content, and writes three fresh JSON Lines outputs under `data/classified/` on each run.
+
 ## `sources.json`
 
 `config/sources.json` is a JSON list of source objects. Each source defines:
@@ -102,6 +104,55 @@ data/normalized/{source_id}.jsonl
 
 Each line is one canonical record. There is no combined all-sources file at this stage.
 
+## Run classification
+
+```bash
+python -m dataset_collection.cli classify
+python -m dataset_collection.cli classify --source historic_england
+```
+
+By default, classification reads all available normalized files under `data/normalized/`, overwrites the stage output files under `data/classified/`, and logs concise record counts plus parse failures.
+
+## Classification approach
+
+Classification is deterministic and rule-based. The classifier lowercases and searches these normalized fields when present:
+
+- `canonical_name`
+- `alternate_names`
+- `site_types`
+- `primary_type`
+- `description`
+- `tags`
+- `raw_name`
+- `raw_type`
+- `raw_subtype`
+- `raw_description`
+
+It uses three keyword groups:
+
+- include terms for strongly megalithic records such as `stone circle`, `standing stones`, and `stone row`
+- review terms for adjacent or ambiguous monument classes such as `ring cairn` and `timber circle`
+- exclude terms for clearly non-megalithic records such as `church`, `castle`, and `bridge`
+
+Specific megalith phrases take priority over exclude terms. Broad megalith terms such as `megalith` and `megalithic` are treated more cautiously and may route a record to review when they conflict with exclude or ambiguous terms.
+
+## Classified output
+
+Classification writes three JSON Lines files:
+
+```text
+data/classified/included.jsonl
+data/classified/excluded.jsonl
+data/classified/review.jsonl
+```
+
+Each output line contains the original normalized record plus:
+
+- `classification`
+- `classification_reason`
+- `classification_rules_matched`
+- `classification_confidence`
+
 ## Canonical schema
 
 Each normalized record contains:
@@ -143,7 +194,8 @@ Every normalized record preserves provenance back to its source record, includin
 This pipeline still intentionally does not include:
 
 - deduplication or record merging
-- megalith-specific classification beyond what a source already states
+- merged master outputs across sources
+- manual review tooling beyond the `review.jsonl` output
 - centroid generation for polygon-only sources
 - database storage
 - combined reporting beyond per-source logs and summary counts
