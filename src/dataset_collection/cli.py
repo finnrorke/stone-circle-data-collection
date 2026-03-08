@@ -4,10 +4,11 @@ import argparse
 import logging
 from pathlib import Path
 
+from dataset_collection.classify import classify_normalized_records
 from dataset_collection.downloader import collect_sources
-from dataset_collection.normalize import normalise_sources
 from dataset_collection.logging_config import configure_logging
 from dataset_collection.manifest import load_sources
+from dataset_collection.normalize import normalise_sources
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,12 @@ def build_parser() -> argparse.ArgumentParser:
     normalise_parser.add_argument("--raw-root", type=Path, default=Path("data/raw"))
     normalise_parser.add_argument("--output-root", type=Path, default=Path("data/normalized"))
     normalise_parser.set_defaults(handler=handle_normalise)
+
+    classify_parser = subparsers.add_parser("classify")
+    classify_parser.add_argument("--source", dest="source_id")
+    classify_parser.add_argument("--normalized-root", type=Path, default=Path("data/normalized"))
+    classify_parser.add_argument("--output-root", type=Path, default=Path("data/classified"))
+    classify_parser.set_defaults(handler=handle_classify)
 
     return parser
 
@@ -74,6 +81,23 @@ def handle_normalise(args: argparse.Namespace) -> int:
         source_errors,
     )
     return 1 if source_errors else 0
+
+
+def handle_classify(args: argparse.Namespace) -> int:
+    summary = classify_normalized_records(
+        normalized_root=args.normalized_root,
+        output_root=args.output_root,
+        source_id=args.source_id,
+    )
+    logger.info(
+        "Classification complete: %s read, %s included, %s excluded, %s review, %s parse failures",
+        summary.records_read,
+        summary.included_count,
+        summary.excluded_count,
+        summary.review_count,
+        summary.parse_failures,
+    )
+    return 0
 
 
 def main() -> int:
